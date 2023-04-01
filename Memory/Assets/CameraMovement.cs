@@ -1,12 +1,14 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraMovement : MonoBehaviour
 {
-    public Waypoint[] waypoints;
+    public Waypoint[] waypointsArray;
     private int currentWaypoint = 0;
     private bool start = false;
+    public GameObject parent;
 
     private void Update()
     {
@@ -14,7 +16,33 @@ public class CameraMovement : MonoBehaviour
     }
 
     private void Start() {
-        StartCoroutine(LateStart(1.5f));
+        StartCoroutine(LateStart( .5f));
+        waypointsArray = FindWavepointsInOrder(parent);
+    }
+    
+    public Waypoint[] FindWavepointsInOrder(GameObject parent)
+    {
+        // Create a list to store the wavepoints
+        List<Waypoint> waypoints = new List<Waypoint>();
+
+        // Get all the children of the parent GameObject
+        Transform[] children = parent.GetComponentsInChildren<Transform>();
+
+        // Loop through all the children
+        foreach (Transform child in children)
+        {
+            // Check if the child has a Wavepoint component
+            Waypoint waypoint = child.GetComponent<Waypoint>();
+
+            // If the child has a Wavepoint component, add it to the list
+            if (waypoint != null)
+            {
+                waypoints.Add(waypoint);
+            }
+        }
+
+        // Return the array of wavepoints
+        return waypoints.ToArray();
     }
 
     IEnumerator LateStart(float seconds) {
@@ -24,13 +52,13 @@ public class CameraMovement : MonoBehaviour
 
     private void MoveToWaypoint()
     {
-        if (currentWaypoint >= waypoints.Length || !start)
+        if (currentWaypoint >= waypointsArray.Length || !start)
         {
             return;
         }
 
 
-        Waypoint waypoint = waypoints[currentWaypoint];
+        Waypoint waypoint = waypointsArray[currentWaypoint];
         transform.position = Vector3.MoveTowards(transform.position, waypoint.transform.position, Time.deltaTime * waypoint.speed);
 
         Debug.Log(waypoint.gameObject.name);
